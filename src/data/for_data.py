@@ -20,12 +20,7 @@ def wav2melspec(root_path, output_path, preprocessor, classes=("real", "fake")):
 
                 spec = preprocessor.process(wav)
 
-                tensor = torch.tensor(
-                    spec,
-                    dtype=torch.float32
-                ).unsqueeze(0)
-
-                datas.append(tensor)
+                datas.append(spec)
                 labels.append(label_idx)
 
             except Exception as e:

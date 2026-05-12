@@ -60,6 +60,6 @@ class AudioPreprocessor:
             align_corners=False
         )
 
-        spec = spec.squeeze(0).squeeze(0)
+        spec = spec.squeeze(0)
 
         return spec
