@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from src.data.dataset import MelSpectrogramDataset
+from data.datasets.dataset import MelSpectrogramDataset
 from src.model.architecture.madnet import MADNet
 import pandas as pd
 
