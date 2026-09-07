@@ -105,7 +105,7 @@ class Trainer:
             final_div_factor=1e4,
         )
 
-        self.scaler = torch.amp.grad_scaler(
+        self.scaler = torch.amp.GradScaler(
             "cuda",
             enabled=self.use_amp
         )
