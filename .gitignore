@@ -1,2 +1,4 @@
 datasets/
 models/
+.cache/
+.vscode/
