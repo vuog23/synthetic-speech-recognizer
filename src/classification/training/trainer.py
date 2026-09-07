@@ -105,8 +105,7 @@ class Trainer:
             final_div_factor=1e4,
         )
 
-        self.scaler = torch.amp.GradScaler(
-            "cuda",
+        self.scaler = torch.cuda.amp.GradScaler(
             enabled=self.use_amp
         )
 
@@ -166,7 +165,7 @@ class Trainer:
                         loss
                     ).backward()
 
-                    self.scaler.stop(
+                    self.scaler.step(
                         self.optimizer
                     )
 
