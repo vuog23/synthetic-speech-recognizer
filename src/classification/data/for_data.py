@@ -4,8 +4,8 @@ import librosa
 import torch
 from torch.utils.data import Dataset
 
-from features.mel_spectrogram import AudioPreprocessor
-from features.spec_augment import SpecAugment
+from src.classification.features.mel_spectrogram import AudioPreprocessor
+from src.classification.features.spec_augment import SpecAugment
 
 class FoRDataset(Dataset):
     def __init__(
