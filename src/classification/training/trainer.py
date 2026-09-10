@@ -56,14 +56,14 @@ class Trainer:
         
         self.train_dataset = FoRDataset(
             root_path=data_root,
-            split="training",
+            split="train",
             preprocessor=self.preprocessor,
             augment=True,
         )
 
         self.val_dataset = FoRDataset(
             root_path=data_root,
-            split="validation",
+            split="val",
             preprocessor=self.preprocessor,
             augment=False,
         )
