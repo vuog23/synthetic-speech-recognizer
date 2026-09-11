@@ -16,21 +16,26 @@ class Trainer:
 
         in_chans: int=1,
         num_classes: int=2,
-        drop_path_rate: float=0.1,
+        drop_path_rate: float=0.0,
 
         batch_size: int=64,
-        lr: float=1e-3,
+        lr: float=1e-4,
         epochs: int=30,
 
         num_workers: int = 2,
+        max_grad_norm: float = 1.0,
+        use_class_weights: bool = True,
+        check_finite: bool = True,
         ):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.epochs = epochs
+        self.max_grad_norm = max_grad_norm
+        self.check_finite = check_finite
 
         print(f"Device: {self.device}")
-        print(f"AMP: {self.use_amp}")
+        print("AMP: False (FP32 training)")
 
         self.preprocessor = AudioPreprocessor(
             sr=16000,
@@ -87,7 +92,34 @@ class Trainer:
             lr=lr,
         )
 
-        self.criterion = nn.CrossEntropyLoss()
+        if use_class_weights:
+            labels = torch.tensor(
+                [label for _, label in self.train_dataset.samples],
+                dtype=torch.long,
+            )
+            class_counts = torch.bincount(
+                labels,
+                minlength=num_classes,
+            ).float()
+
+            if (class_counts == 0).any():
+                raise RuntimeError(
+                    f"Every class must contain samples; counts={class_counts.tolist()}"
+                )
+
+            class_weights = class_counts.sum() / (
+                num_classes * class_counts
+            )
+            class_weights = class_weights.to(self.device)
+
+            print(f"Class counts: {class_counts.tolist()}")
+            print(f"Class weights: {class_weights.tolist()}")
+        else:
+            class_weights = None
+
+        self.criterion = nn.CrossEntropyLoss(
+            weight=class_weights
+        )
 
 
     def _run_epoch(
@@ -110,7 +142,13 @@ class Trainer:
             context = torch.inference_mode()
 
         with context:
-            for specs, labels in loader:
+            for batch_index, (specs, labels) in enumerate(loader):
+
+                if self.check_finite and not torch.isfinite(specs).all():
+                    phase = "train" if train else "validation"
+                    raise FloatingPointError(
+                        f"Non-finite input in {phase} batch {batch_index}."
+                    )
 
                 specs = specs.to(
                     self.device,
@@ -129,14 +167,41 @@ class Trainer:
 
                 outputs = self.model(specs)
 
+                if self.check_finite and not torch.isfinite(outputs).all():
+                    phase = "train" if train else "validation"
+                    raise FloatingPointError(
+                        f"Non-finite model output in {phase} batch "
+                        f"{batch_index}; lr={self.optimizer.param_groups[0]['lr']:.3e}."
+                    )
+
                 # Loss
                 loss = self.criterion(
                     outputs,
                     labels
                 )
 
+                if self.check_finite and not torch.isfinite(loss):
+                    phase = "train" if train else "validation"
+                    raise FloatingPointError(
+                        f"Non-finite loss in {phase} batch {batch_index}; "
+                        f"lr={self.optimizer.param_groups[0]['lr']:.3e}."
+                    )
+
                 if train:
                     loss.backward()
+
+                    grad_norm = nn.utils.clip_grad_norm_(
+                        self.model.parameters(),
+                        max_norm=self.max_grad_norm,
+                    )
+
+                    if self.check_finite and not torch.isfinite(grad_norm):
+                        raise FloatingPointError(
+                            f"Non-finite gradient norm in train batch "
+                            f"{batch_index}; lr="
+                            f"{self.optimizer.param_groups[0]['lr']:.3e}."
+                        )
+
                     self.optimizer.step()
 
                 current_batch_size = specs.size(0)
@@ -146,14 +211,14 @@ class Trainer:
                 )
 
                 predictions = outputs.argmax(
-                dim=1
-            )
+                    dim=1
+                )
 
-            correct += (
-                predictions == labels
-            ).sum().item()
+                correct += (
+                    predictions == labels
+                ).sum().item()
 
-            total += current_batch_size
+                total += current_batch_size
 
         if total == 0:
             raise RuntimeError(

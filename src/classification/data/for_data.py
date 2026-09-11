@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import librosa
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 
@@ -63,6 +64,11 @@ class FoRDataset(Dataset):
             mono=True
         )
 
+        if not np.isfinite(wav).all():
+            raise FloatingPointError(
+                f"Audio contains NaN or Inf values: {file_path}"
+            )
+
         spec = self.preprocessor.process(
             wav,
             training=self.augment
@@ -70,6 +76,11 @@ class FoRDataset(Dataset):
 
         if self.augment:
             spec = self.spec_augment(spec)
+
+        if not torch.isfinite(spec).all():
+            raise FloatingPointError(
+                f"Spectrogram contains NaN or Inf values: {file_path}"
+            )
 
         return spec, torch.tensor(
             label,
