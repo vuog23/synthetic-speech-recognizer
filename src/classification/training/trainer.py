@@ -2,8 +2,7 @@ import torch
 import timm
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torch.optim import AdamW
-from torch.optim.lr_scheduler import OneCycleLR
+from torch.optim import Adam
 import pandas as pd
 
 from src.classification.data.for_data import FoRDataset
@@ -21,17 +20,14 @@ class Trainer:
 
         batch_size: int=64,
         lr: float=1e-3,
-        weight_decay: float=1e-5,
         epochs: int=30,
 
         num_workers: int = 2,
-        use_amp: bool = True,
         ):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.epochs = epochs
-        self.use_amp = use_amp and self.device.type == "cuda"
 
         print(f"Device: {self.device}")
         print(f"AMP: {self.use_amp}")
@@ -46,7 +42,7 @@ class Trainer:
         )
         
         self.model = timm.create_model(
-            model_path, # "convnext_tiny_hnf.a2h_in1k"
+            model_path,
             pretrained=True,
             in_chans=in_chans,
             num_classes=num_classes,
@@ -86,28 +82,12 @@ class Trainer:
             drop_last=False
         )
 
-        self.optimizer = AdamW(
+        self.optimizer = Adam(
             self.model.parameters(),
             lr=lr,
-            weight_decay=weight_decay
         )
 
         self.criterion = nn.CrossEntropyLoss()
-
-        self.scheduler = OneCycleLR(
-            self.optimizer,
-            max_lr=lr,
-            epochs=epochs,
-            steps_per_epoch=len(self.train_loader),
-            pct_start=0.3,
-            anneal_strategy='cos',
-            div_factor=25.0,
-            final_div_factor=1e4,
-        )
-
-        self.scaler = torch.cuda.amp.GradScaler(
-            enabled=self.use_amp
-        )
 
 
     def _run_epoch(
@@ -115,7 +95,6 @@ class Trainer:
         loader: DataLoader,
         train: bool
     ):
-
         if train:
             self.model.train()
         else:
@@ -132,6 +111,7 @@ class Trainer:
 
         with context:
             for specs, labels in loader:
+
                 specs = specs.to(
                     self.device,
                     non_blocking=True
@@ -147,47 +127,38 @@ class Trainer:
                         set_to_none=True
                     )
 
-                with torch.autocast(
-                    device_type=self.device.type,
-                    dtype=torch.float16,
-                    enabled=self.use_amp,
-                ):
+                outputs = self.model(specs)
 
-                    outputs = self.model(specs)
-
-                    loss = self.criterion(
-                        outputs,
-                        labels
-                    )
+                # Loss
+                loss = self.criterion(
+                    outputs,
+                    labels
+                )
 
                 if train:
-                    self.scaler.scale(
-                        loss
-                    ).backward()
+                    loss.backward()
+                    self.optimizer.step()
 
-                    self.scaler.step(
-                        self.optimizer
-                    )
-
-                    self.scaler.update()
-
-                    self.scheduler.step()
-
-                batch_size = specs.size(0)
+                current_batch_size = specs.size(0)
 
                 total_loss += (
-                    loss.item() * batch_size
+                    loss.item() * current_batch_size
                 )
 
                 predictions = outputs.argmax(
-                    dim=1
-                )
+                dim=1
+            )
 
-                correct += (
-                    predictions == labels
-                ).sum().item()
+            correct += (
+                predictions == labels
+            ).sum().item()
 
-                total += batch_size
+            total += current_batch_size
+
+        if total == 0:
+            raise RuntimeError(
+                "DataLoader contains zero samples."
+            )
 
         avg_loss = total_loss / total
         accuracy = correct / total

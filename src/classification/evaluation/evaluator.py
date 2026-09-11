@@ -71,7 +71,7 @@ class Evaluator:
     def evaluate(
         self,
         data_root: str,
-        split: str = "testing",
+        split: str = "test",
     ):
 
         test_dataset = FoRDataset(
