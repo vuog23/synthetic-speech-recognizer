@@ -41,8 +41,12 @@ class FoRDataset(Dataset):
 
             label = self.class_to_idx[class_name]
 
+            # Final contains ASVspoof/LibriSpeech WAV files and VCTK FLAC files.
+            # librosa supports both formats, so keep the merged dataset intact.
             files = sorted(
-                class_dir.glob("*.wav")
+                path
+                for suffix in ("*.wav", "*.flac")
+                for path in class_dir.glob(suffix)
             )
 
             for file_path in files:

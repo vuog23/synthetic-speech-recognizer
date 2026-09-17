@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101210">
+  <meta name="description" content="Record, transcribe, create, and explore the difference between human and synthetic speech.">
+  <title>Synthetic Speech Recognizer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%231ed760'/%3E%3Cpath d='M10 17v6m7-12v18m7-15v12m7-9v6' stroke='%23101210' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/app/styles.css">
+  <script type="module" src="/app/app.js"></script>
+</head>
+<body>
+  <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 10v4m4-8v12m5-16v20m5-16v12m4-8v4"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 5h16M12 5v15m-4 0h8M4 5v3m16-3v3"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="4"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 14V11a8 8 0 0 1 16 0v3"/><rect x="3" y="12" width="4" height="9" rx="2"/><rect x="17" y="12" width="4" height="9" rx="2"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  </svg>
+
+<main id="main">
+    <header class="studio-brand"><a href="/" class="brand" aria-label="Voxlab home"><span class="brand-mark"><svg><use href="#i-wave"/></svg></span>voxlab<span class="brand-dot">.</span></a></header>
+    <section hidden class="hero" aria-labelledby="page-title">
+      <div class="hero-copy"><div class="eyebrow"><span class="green-dot"></span> THE SPEECH PLAYGROUND</div><h1 id="page-title">Every voice has<br>a story. <span>Listen closer.</span></h1><p>From spoken words to synthetic voices.<br>Record, create, and discover what makes them different.</p><div class="hero-tags"><span>Whisper base</span><i></i><span>Kokoro 82M</span><i></i><span>ConvNeXt</span></div></div>
+      <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="record-disc"><div class="disc-groove"></div><div class="disc-label"><svg><use href="#i-wave"/></svg></div></div><div class="art-tag"><span class="green-dot"></span> A different kind of listening</div><span class="art-star">✦</span></div>
+    </section>
+
+    <div class="workspace-grid">
+      <div class="work-column">
+        <section class="panel input-panel" aria-labelledby="input-title">
+          <div class="panel-heading"><div class="section-title"><span class="step-number">01</span><h3 id="input-title">Choose your input source</h3></div><div class="tabs" role="tablist" aria-label="Input mode"><button id="speech-tab" class="tab active" role="tab" aria-selected="true" aria-controls="speech-input"><svg><use href="#i-mic"/></svg>Speech</button><button id="text-tab" class="tab" role="tab" aria-selected="false" aria-controls="text-input" tabindex="-1"><svg><use href="#i-text"/></svg>Text</button></div></div>
+          <div id="speech-input" role="tabpanel" aria-labelledby="speech-tab">
+            <div class="record-zone" id="record-zone"><div class="record-copy"><strong id="record-title">Something to say?</strong><p id="record-hint">Hold the button, speak, then release.</p></div><button id="record-button" class="record-button" aria-label="Hold to record. Release to stop." aria-describedby="record-hint"><svg><use href="#i-mic"/></svg></button></div>
+            <div class="record-footer"><span id="record-time">Up to 60 seconds</span><button class="text-button" id="upload-button"><svg><use href="#i-upload"/></svg>Upload audio</button><input id="audio-upload" type="file" accept="audio/*" hidden></div>
+          </div>
+          <div id="text-input" class="text-intro" role="tabpanel" aria-labelledby="text-tab" hidden><span class="text-intro-icon"><svg><use href="#i-text"/></svg></span><div><strong>Good voices start with good words.</strong><p>Write in the text box below, choose a voice, and bring it to life.</p></div></div>
+          <div class="audio-preview">
+            <div class="preview-header"><div><span class="green-dot" id="audio-dot"></span><strong id="audio-name">Audio waveform</strong><select id="track-select" aria-label="Select session audio" hidden></select></div><div class="preview-actions"><span id="audio-duration">--:--</span><button class="icon-button" id="replay" aria-label="Replay audio from the beginning" title="Replay from beginning" disabled><svg><use href="#i-replay"/></svg></button></div></div>
+            <div class="waveform-wrap" id="waveform-wrap"><canvas id="waveform" aria-label="Audio waveform"></canvas><div id="waveform-empty">Random waveform</div><div class="playhead" id="playhead" hidden><span></span></div><input type="range" id="waveform-seek" class="waveform-seek" min="0" max="1000" value="0" aria-label="Seek through audio waveform" disabled></div>
+            <div class="waveform-axis"><span>0:00</span><span id="audio-format"></span><span id="waveform-end">0:00</span></div>
+          </div>
+        </section>
+
+        <section class="panel editor-panel" aria-labelledby="editor-title">
+          <div class="panel-heading"><div class="section-title"><span class="step-number">02</span><h3 id="editor-title">Transcript</h3></div><span class="small-label" id="transcript-state">EDITABLE TEXT</span></div>
+          <label class="sr-only" for="transcript">Transcript or text to generate speech</label><textarea id="transcript" maxlength="1000" placeholder="Text field" spellcheck="true"></textarea>
+          <div class="editor-meta"><span id="editor-hint">Click to edit.</span><span id="character-count">0 / 1,000</span></div>
+          <div class="voice-controls"><label for="voice">Voice<select id="voice"><option value="af_heart">Heart · American English</option><option value="af_bella">Bella · American English</option><option value="am_michael">Michael · American English</option><option value="bf_emma">Emma · British English</option><option value="bm_george">George · British English</option></select></label><label for="speed">Speed<select id="speed"><option value="0.8">0.8×</option><option value="1" selected>1.0×</option><option value="1.2">1.2×</option></select></label></div>
+          <div class="editor-actions"><button class="button secondary" id="generate" disabled><svg><use href="#i-spark"/></svg>Generate speech</button><button class="button primary" id="classify" disabled>Analyze speech<svg><use href="#i-arrow"/></svg></button></div>
+          <div class="editor-bottom"><button class="text-button" id="retry-transcribe" hidden>Retry transcription</button><span id="analysis-source"></span></div>
+        </section>
+        <section class="panel result-panel" aria-labelledby="result-title"><div class="panel-heading"><div class="section-title"><span class="step-number">03</span><h3 id="result-title">Recognition result</h3></div><svg class="muted-icon"><use href="#i-wave"/></svg></div>
+          <div id="result-empty" class="result-empty"><div class="radar"><span></span><svg><use href="#i-wave"/></svg></div><h4>Human or synthetic?</h4></div>
+          <div id="result-content" class="result-content" hidden><span class="small-label">PREDICTED VOICE</span><h4 id="result-label"></h4><div class="confidence"><strong id="result-probability"></strong><span>model probability</span></div><div id="result-scores" class="result-scores"></div><p id="result-track" class="result-track" hidden></p></div>
+          <div class="model-footer"><span class="model-dot"></span><span id="classifier-name">ConvNeXt Base · INT8</span></div>
+        </section>
+      </div>
+    </div>
+    <div id="status-bar" class="status-bar" role="status" aria-live="polite" hidden><span class="status-dot"></span><span id="status-text"></span><button id="cancel-task" class="text-button" hidden>Cancel</button></div>
+    <footer class="main-footer" hidden><span>A little curiosity. A closer listen.</span><span>BUILT FOR SOUND EXPLORERS</span></footer>
+  </main>
+
+  <footer class="player" aria-label="Audio player"><div class="now-playing"><div class="track-art"><svg><use href="#i-wave"/></svg></div><div><strong id="player-title">Nothing playing. Yet.</strong><span id="player-subtitle">Make some sound in the studio</span></div><button class="icon-button" id="download" aria-label="Download selected audio as WAV" disabled><svg><use href="#i-download"/></svg></button></div><div class="player-center"><div class="transport"><button class="icon-button" id="player-replay" aria-label="Replay from beginning" disabled><svg><use href="#i-replay"/></svg></button><button class="play-button" id="play" aria-label="Play audio" disabled><svg><use id="play-icon" href="#i-play"/></svg></button><span class="transport-spacer"></span></div><div class="player-timeline"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="1000" value="0" aria-label="Playback position" disabled><span id="total">0:00</span></div></div><div class="player-volume"><svg><use href="#i-volume"/></svg><input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume"><span class="player-quality">AUDIO STUDIO</span></div></footer>
+
+<noscript>This studio needs JavaScript enabled to record audio and run speech models.</noscript>
+</body>
+</html>

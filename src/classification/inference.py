@@ -2,28 +2,32 @@ import timm
 import torch
 import numpy as np
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+class Inference:
+    def __init__(
+        self,
+        model_path: str,
+        checkpoint_path: str):
 
-model = timm.create_model(
-    "convnext_tiny_hnf.a2h_in1k",
-    pretrained=False,
-    in_chans=1,
-    num_classes=2,
-).to(device)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-state_dict = torch.load(
-    r"D:\Project\Synthetic Speech Recognizer\models\convnext_tiny\best_model.pt",
-)
+        self.model = timm.create_model(
+            "convnext_tiny_hnf.a2h_in1k",
+            pretrained=False,
+            in_chans=1,
+            num_classes=2,
+        ).to(self.device)
 
-model.load_state_dict(state_dict)
+        state_dict = torch.load(checkpoint_path)
 
-model.eval()
+        self.model.load_state_dict(state_dict)
 
-with torch.inference_mode():
-    logits = model(x)
-    probabilities = torch.softmax(logits, dim=1)
-    prediction = torch.argmax(probabilities, dim=1).item()
-    confidence = probabilities[0, prediction].item()
+        self.model.eval()
 
-print(f"Predicted: {prediction}")
-print(f"Confidence: {confidence:.4f}")
+    def predict(self, x):
+        with torch.inference_mode():
+            logits = self.model(x)
+            probs = torch.softmax(logits, dim=1)
+            pred = torch.argmax(probs, dim=1).item()
+            conf = probs[0, self.predict].item()
+
+        return pred, conf   

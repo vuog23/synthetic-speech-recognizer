@@ -1,0 +1,14 @@
+{
+  "name": "voxlab-speech-studio",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python run.py",
+    "dev": "python run.py",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
